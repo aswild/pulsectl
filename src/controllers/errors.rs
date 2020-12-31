@@ -28,6 +28,14 @@ impl fmt::Debug for ControllerError {
     }
 }
 
+impl fmt::Display for ControllerError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        <Self as fmt::Debug>::fmt(self, f)
+    }
+}
+
+impl std::error::Error for ControllerError {}
+
 pub(crate) enum ControllerErrorType {
     PulseCtlError,
     GetInfoError,

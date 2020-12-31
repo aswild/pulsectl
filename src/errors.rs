@@ -29,6 +29,14 @@ impl fmt::Debug for PulseCtlError {
     }
 }
 
+impl fmt::Display for PulseCtlError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        <Self as fmt::Debug>::fmt(self, f)
+    }
+}
+
+impl std::error::Error for PulseCtlError {}
+
 pub(crate) enum PulseCtlErrorType {
     ConnectError,
     OperationError,
