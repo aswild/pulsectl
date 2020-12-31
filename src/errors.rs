@@ -1,12 +1,15 @@
 use std::fmt;
 
-use pulse::error::{PAErr};
+use pulse::error::PAErr;
 
 impl From<PAErr> for PulseCtlError {
     fn from(error: PAErr) -> Self {
         PulseCtlError {
             error: PulseCtlErrorType::PulseAudioError,
-            message: format!("PulseAudio returned error: {}", error.to_string().unwrap_or("Unknown".to_owned())),
+            message: format!(
+                "PulseAudio returned error: {}",
+                error.to_string().as_deref().unwrap_or("Unknown")
+            ),
         }
     }
 }
@@ -37,6 +40,7 @@ impl fmt::Display for PulseCtlError {
 
 impl std::error::Error for PulseCtlError {}
 
+#[allow(clippy::enum_variant_names)]
 pub(crate) enum PulseCtlErrorType {
     ConnectError,
     OperationError,

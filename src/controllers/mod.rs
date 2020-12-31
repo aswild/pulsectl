@@ -85,10 +85,9 @@ impl SinkController {
         });
         self.handler.wait_for_operation(op)?;
         let mut result = server.borrow_mut();
-        result.take().unwrap().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting information about the server",
-        ))
+        result.take().unwrap().ok_or_else(|| {
+            ControllerError::new(GetInfoError, "Error getting information about the server")
+        })
     }
 }
 
@@ -110,7 +109,7 @@ impl DeviceControl<DeviceInfo> for SinkController {
             .borrow_mut()
             .set_default_sink(name, move |res| success_ref.borrow_mut().clone_from(&res));
         self.handler.wait_for_operation(op)?;
-        let result = success.borrow_mut().clone();
+        let result = *success.borrow();
         Ok(result)
     }
 
@@ -127,10 +126,9 @@ impl DeviceControl<DeviceInfo> for SinkController {
         );
         self.handler.wait_for_operation(op)?;
         let mut result = list.borrow_mut();
-        result.take().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting device list",
-        ))
+        result
+            .take()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting device list"))
     }
     fn get_device_by_index(&mut self, index: u32) -> Result<DeviceInfo, ControllerError> {
         let device = Rc::new(RefCell::new(Some(None)));
@@ -145,10 +143,10 @@ impl DeviceControl<DeviceInfo> for SinkController {
         );
         self.handler.wait_for_operation(op)?;
         let mut result = device.borrow_mut();
-        result.take().unwrap().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting requested device",
-        ))
+        result
+            .take()
+            .unwrap()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting requested device"))
     }
     fn get_device_by_name(&mut self, name: &str) -> Result<DeviceInfo, ControllerError> {
         let device = Rc::new(RefCell::new(Some(None)));
@@ -163,10 +161,10 @@ impl DeviceControl<DeviceInfo> for SinkController {
         );
         self.handler.wait_for_operation(op)?;
         let mut result = device.borrow_mut();
-        result.take().unwrap().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting requested device",
-        ))
+        result
+            .take()
+            .unwrap()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting requested device"))
     }
 
     fn set_device_volume_by_index(&mut self, index: u32, volume: &ChannelVolumes) {
@@ -185,7 +183,7 @@ impl DeviceControl<DeviceInfo> for SinkController {
     }
     fn increase_device_volume_by_percent(&mut self, index: u32, delta: f64) {
         if let Ok(mut dev_ref) = self.get_device_by_index(index) {
-            let new_vol = Volume::from(Volume(volume_from_percent(delta) as u32));
+            let new_vol = Volume(volume_from_percent(delta) as u32);
             if let Some(volumes) = dev_ref.volume.increase(new_vol) {
                 let op = self
                     .handler
@@ -197,7 +195,7 @@ impl DeviceControl<DeviceInfo> for SinkController {
     }
     fn decrease_device_volume_by_percent(&mut self, index: u32, delta: f64) {
         if let Ok(mut dev_ref) = self.get_device_by_index(index) {
-            let new_vol = Volume::from(Volume(volume_from_percent(delta) as u32));
+            let new_vol = Volume(volume_from_percent(delta) as u32);
             if let Some(volumes) = dev_ref.volume.decrease(new_vol) {
                 let op = self
                     .handler
@@ -223,10 +221,9 @@ impl AppControl<ApplicationInfo> for SinkController {
         );
         self.handler.wait_for_operation(op)?;
         let mut result = list.borrow_mut();
-        result.take().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting application list",
-        ))
+        result
+            .take()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting application list"))
     }
 
     fn get_app_by_index(&mut self, index: u32) -> Result<ApplicationInfo, ControllerError> {
@@ -242,15 +239,15 @@ impl AppControl<ApplicationInfo> for SinkController {
         );
         self.handler.wait_for_operation(op)?;
         let mut result = app.borrow_mut();
-        result.take().unwrap().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting requested app",
-        ))
+        result
+            .take()
+            .unwrap()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting requested app"))
     }
 
     fn increase_app_volume_by_percent(&mut self, index: u32, delta: f64) {
         if let Ok(mut app_ref) = self.get_app_by_index(index) {
-            let new_vol = Volume::from(Volume(volume_from_percent(delta) as u32));
+            let new_vol = Volume(volume_from_percent(delta) as u32);
             if let Some(volumes) = app_ref.volume.increase(new_vol) {
                 let op = self
                     .handler
@@ -263,7 +260,7 @@ impl AppControl<ApplicationInfo> for SinkController {
 
     fn decrease_app_volume_by_percent(&mut self, index: u32, delta: f64) {
         if let Ok(mut app_ref) = self.get_app_by_index(index) {
-            let new_vol = Volume::from(Volume(volume_from_percent(delta) as u32));
+            let new_vol = Volume(volume_from_percent(delta) as u32);
             if let Some(volumes) = app_ref.volume.decrease(new_vol) {
                 let op = self
                     .handler
@@ -289,7 +286,7 @@ impl AppControl<ApplicationInfo> for SinkController {
             })),
         );
         self.handler.wait_for_operation(op)?;
-        let result = success.borrow_mut().clone();
+        let result = *success.borrow();
         Ok(result)
     }
 
@@ -308,7 +305,7 @@ impl AppControl<ApplicationInfo> for SinkController {
             })),
         );
         self.handler.wait_for_operation(op)?;
-        let result = success.borrow_mut().clone();
+        let result = *success.borrow();
         Ok(result)
     }
 
@@ -323,7 +320,7 @@ impl AppControl<ApplicationInfo> for SinkController {
             })),
         );
         self.handler.wait_for_operation(op)?;
-        let result = success.borrow_mut().clone();
+        let result = *success.borrow();
         Ok(result)
     }
 }
@@ -351,10 +348,10 @@ impl SourceController {
         });
         self.handler.wait_for_operation(op)?;
         let mut result = server.borrow_mut();
-        result.take().unwrap().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting application list",
-        ))
+        result
+            .take()
+            .unwrap()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting application list"))
     }
 }
 
@@ -376,7 +373,7 @@ impl DeviceControl<DeviceInfo> for SourceController {
             .borrow_mut()
             .set_default_source(name, move |res| success_ref.borrow_mut().clone_from(&res));
         self.handler.wait_for_operation(op)?;
-        let result = success.borrow_mut().clone();
+        let result = *success.borrow();
         Ok(result)
     }
 
@@ -393,10 +390,9 @@ impl DeviceControl<DeviceInfo> for SourceController {
         );
         self.handler.wait_for_operation(op)?;
         let mut result = list.borrow_mut();
-        result.take().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting application list",
-        ))
+        result
+            .take()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting application list"))
     }
     fn get_device_by_index(&mut self, index: u32) -> Result<DeviceInfo, ControllerError> {
         let device = Rc::new(RefCell::new(Some(None)));
@@ -411,10 +407,10 @@ impl DeviceControl<DeviceInfo> for SourceController {
         );
         self.handler.wait_for_operation(op)?;
         let mut result = device.borrow_mut();
-        result.take().unwrap().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting application list",
-        ))
+        result
+            .take()
+            .unwrap()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting application list"))
     }
     fn get_device_by_name(&mut self, name: &str) -> Result<DeviceInfo, ControllerError> {
         let device = Rc::new(RefCell::new(Some(None)));
@@ -429,10 +425,10 @@ impl DeviceControl<DeviceInfo> for SourceController {
         );
         self.handler.wait_for_operation(op)?;
         let mut result = device.borrow_mut();
-        result.take().unwrap().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting application list",
-        ))
+        result
+            .take()
+            .unwrap()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting application list"))
     }
 
     fn set_device_volume_by_index(&mut self, index: u32, volume: &ChannelVolumes) {
@@ -451,7 +447,7 @@ impl DeviceControl<DeviceInfo> for SourceController {
     }
     fn increase_device_volume_by_percent(&mut self, index: u32, delta: f64) {
         if let Ok(mut dev_ref) = self.get_device_by_index(index) {
-            let new_vol = Volume::from(Volume(volume_from_percent(delta) as u32));
+            let new_vol = Volume(volume_from_percent(delta) as u32);
             if let Some(volumes) = dev_ref.volume.increase(new_vol) {
                 let op = self
                     .handler
@@ -463,7 +459,7 @@ impl DeviceControl<DeviceInfo> for SourceController {
     }
     fn decrease_device_volume_by_percent(&mut self, index: u32, delta: f64) {
         if let Ok(mut dev_ref) = self.get_device_by_index(index) {
-            let new_vol = Volume::from(Volume(volume_from_percent(delta) as u32));
+            let new_vol = Volume(volume_from_percent(delta) as u32);
             if let Some(volumes) = dev_ref.volume.decrease(new_vol) {
                 let op = self
                     .handler
@@ -489,10 +485,9 @@ impl AppControl<ApplicationInfo> for SourceController {
         );
         self.handler.wait_for_operation(op)?;
         let mut result = list.borrow_mut();
-        result.take().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting application list",
-        ))
+        result
+            .take()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting application list"))
     }
 
     fn get_app_by_index(&mut self, index: u32) -> Result<ApplicationInfo, ControllerError> {
@@ -508,15 +503,15 @@ impl AppControl<ApplicationInfo> for SourceController {
         );
         self.handler.wait_for_operation(op)?;
         let mut result = app.borrow_mut();
-        result.take().unwrap().ok_or(ControllerError::new(
-            GetInfoError,
-            "Error getting application list",
-        ))
+        result
+            .take()
+            .unwrap()
+            .ok_or_else(|| ControllerError::new(GetInfoError, "Error getting application list"))
     }
 
     fn increase_app_volume_by_percent(&mut self, index: u32, delta: f64) {
         if let Ok(mut app_ref) = self.get_app_by_index(index) {
-            let new_vol = Volume::from(Volume(volume_from_percent(delta) as u32));
+            let new_vol = Volume(volume_from_percent(delta) as u32);
             if let Some(volumes) = app_ref.volume.increase(new_vol) {
                 let op = self
                     .handler
@@ -529,7 +524,7 @@ impl AppControl<ApplicationInfo> for SourceController {
 
     fn decrease_app_volume_by_percent(&mut self, index: u32, delta: f64) {
         if let Ok(mut app_ref) = self.get_app_by_index(index) {
-            let new_vol = Volume::from(Volume(volume_from_percent(delta) as u32));
+            let new_vol = Volume(volume_from_percent(delta) as u32);
             if let Some(volumes) = app_ref.volume.decrease(new_vol) {
                 let op = self
                     .handler
@@ -555,7 +550,7 @@ impl AppControl<ApplicationInfo> for SourceController {
             })),
         );
         self.handler.wait_for_operation(op)?;
-        let result = success.borrow_mut().clone();
+        let result = *success.borrow();
         Ok(result)
     }
 
@@ -574,7 +569,7 @@ impl AppControl<ApplicationInfo> for SourceController {
             })),
         );
         self.handler.wait_for_operation(op)?;
-        let result = success.borrow_mut().clone();
+        let result = *success.borrow();
         Ok(result)
     }
 
@@ -589,7 +584,7 @@ impl AppControl<ApplicationInfo> for SourceController {
             })),
         );
         self.handler.wait_for_operation(op)?;
-        let result = success.borrow_mut().clone();
+        let result = *success.borrow();
         Ok(result)
     }
 }
