@@ -34,6 +34,8 @@ pub trait DeviceControl<T> {
     fn get_device_by_name(&mut self, name: &str) -> Result<T, ControllerError>;
     fn set_device_volume_by_index(&mut self, index: u32, volume: &ChannelVolumes);
     fn set_device_volume_by_name(&mut self, name: &str, volume: &ChannelVolumes);
+    fn set_device_mute_by_index(&mut self, index: u32, mute: bool);
+    fn set_device_mute_by_name(&mut self, name: &str, mute: bool);
     fn increase_device_volume_by_percent(&mut self, index: u32, delta: f64);
     fn decrease_device_volume_by_percent(&mut self, index: u32, delta: f64);
 }
@@ -179,6 +181,20 @@ impl DeviceControl<DeviceInfo> for SinkController {
             .handler
             .introspect
             .set_sink_volume_by_name(name, volume, None);
+        self.handler.wait_for_operation(op).ok();
+    }
+    fn set_device_mute_by_index(&mut self, index: u32, mute: bool) {
+        let op = self
+            .handler
+            .introspect
+            .set_sink_mute_by_index(index, mute, None);
+        self.handler.wait_for_operation(op).ok();
+    }
+    fn set_device_mute_by_name(&mut self, name: &str, mute: bool) {
+        let op = self
+            .handler
+            .introspect
+            .set_sink_mute_by_name(name, mute, None);
         self.handler.wait_for_operation(op).ok();
     }
     fn increase_device_volume_by_percent(&mut self, index: u32, delta: f64) {
@@ -456,6 +472,20 @@ impl DeviceControl<DeviceInfo> for SourceController {
                 self.handler.wait_for_operation(op).ok();
             }
         }
+    }
+    fn set_device_mute_by_index(&mut self, index: u32, mute: bool) {
+        let op = self
+            .handler
+            .introspect
+            .set_sink_mute_by_index(index, mute, None);
+        self.handler.wait_for_operation(op).ok();
+    }
+    fn set_device_mute_by_name(&mut self, name: &str, mute: bool) {
+        let op = self
+            .handler
+            .introspect
+            .set_sink_mute_by_name(name, mute, None);
+        self.handler.wait_for_operation(op).ok();
     }
     fn decrease_device_volume_by_percent(&mut self, index: u32, delta: f64) {
         if let Ok(mut dev_ref) = self.get_device_by_index(index) {
