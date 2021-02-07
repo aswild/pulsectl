@@ -16,7 +16,7 @@ impl From<PulseCtlError> for ControllerError {
 
 impl fmt::Display for ControllerError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        fmt::Debug::fmt(self, f)
     }
 }
 
@@ -36,14 +36,6 @@ impl fmt::Debug for ControllerError {
         write!(f, "[{}]: {}", error_string, self.message)
     }
 }
-
-impl fmt::Display for ControllerError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as fmt::Debug>::fmt(self, f)
-    }
-}
-
-impl std::error::Error for ControllerError {}
 
 pub(crate) enum ControllerErrorType {
     PulseCtlError,
